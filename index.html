@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1a0f0a">
+  <title>ElfBull - Интернет-магазин вейп-товаров</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-color: #FF6B35;
+      --primary-dark: #E55A2B;
+      --secondary-color: #FFD700;
+      --accent-color: #DC2626;
+      --gold-color: #FFD700;
+      --orange-color: #FF6B35;
+      --red-color: #DC2626;
+      --dark-bg: #1a0f0a;
+      --dark-surface: #2a1a15;
+      --dark-surface-light: #3a2a20;
+      --text-primary: #ffffff;
+      --text-secondary: #e8d4c4;
+      --border-color: #4a2a1f;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      position: relative;
+      min-height: 100vh;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 215, 0, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(220, 38, 38, 0.05) 0%, transparent 50%),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 100px,
+          rgba(255, 107, 53, 0.02) 100px,
+          rgba(255, 107, 53, 0.02) 101px
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 100px,
+          rgba(255, 107, 53, 0.02) 100px,
+          rgba(255, 107, 53, 0.02) 101px
+        );
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, 
+        rgba(26, 15, 10, 0.95) 0%,
+        transparent 15%,
+        transparent 85%,
+        rgba(26, 15, 10, 0.95) 100%
+      );
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Splash / Loading Screen */
+    .splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--dark-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.6s ease;
+    }
+
+    .splash.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .splash-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .splash-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      margin-top: -1rem;
+      background: radial-gradient(circle, rgba(255, 107, 53, 0.4) 0%, rgba(255, 215, 0, 0.2) 40%, transparent 70%);
+      border-radius: 50%;
+      animation: splashGlow 2s ease-in-out infinite;
+    }
+
+    .splash-logo {
+      width: 180px;
+      height: 180px;
+      background-image: url('assets/elfbull-logo-full.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      animation: splashLogoPulse 1.5s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+
+    .splash-loader {
+      width: 80px;
+      height: 4px;
+      background: rgba(255, 107, 53, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .splash-loader-bar {
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, var(--orange-color), var(--gold-color));
+      border-radius: 2px;
+      animation: splashLoader 1.2s ease-in-out infinite;
+    }
+
+    @keyframes splashLogoPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.9; }
+    }
+
+    @keyframes splashGlow {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    @keyframes splashLoader {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    /* Плавный переход при навигации */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--dark-bg);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Header */
+    .header {
+      background: var(--dark-surface);
+      border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      background: rgba(42, 26, 21, 0.95);
+      position: relative;
+      box-shadow: 0 2px 10px rgba(255, 107, 53, 0.1);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex: 1;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 1;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .logo-image {
+      height: 60px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(255, 107, 53, 0.3));
+      transition: transform 0.3s ease;
+    }
+
+    .logo-image:hover {
+      transform: scale(1.05);
+    }
+
+    .nav {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--gold-color);
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    }
+
+    .cart-button {
+      position: relative;
+      background: var(--primary-color);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .cart-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+    }
+
+    .cart-icon {
+      font-size: 1.25rem;
+    }
+
+    .cart-badge {
+      background: var(--red-color);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: linear-gradient(135deg, #2a1a15 0%, #1a0f0a 50%, #2a1a15 100%);
+    }
+
+    .hero-logo-bg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background-image: url('assets/elfbull-logo-full.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      filter: blur(12px);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 215, 0, 0.15) 0%,
+        rgba(255, 107, 53, 0.2) 30%,
+        rgba(220, 38, 38, 0.15) 60%,
+        transparent 80%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-flames {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 250px;
+      background: linear-gradient(to top, 
+        rgba(220, 38, 38, 0.4) 0%,
+        rgba(255, 107, 53, 0.35) 25%,
+        rgba(255, 165, 0, 0.25) 50%,
+        rgba(255, 215, 0, 0.15) 75%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2rem;
+      max-width: 800px;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--gold-color), var(--orange-color), var(--red-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.8;
+      text-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+    }
+
+    .hero-button {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--orange-color), var(--red-color));
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    }
+
+    .hero-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 4rem 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      text-align: center;
+      background: linear-gradient(135deg, var(--gold-color), var(--orange-color), var(--red-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .product-card {
+      background: linear-gradient(135deg, var(--dark-surface) 0%, #2a1f1a 100%);
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 2px solid rgba(255, 107, 53, 0.2);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 32px rgba(255, 107, 53, 0.4);
+      border-color: var(--orange-color);
+      background: linear-gradient(135deg, #3a2a20 0%, #2a1f1a 100%);
+    }
+
+    .product-image {
+      background: linear-gradient(135deg, 
+        rgba(255, 215, 0, 0.1) 0%,
+        rgba(255, 107, 53, 0.15) 50%,
+        rgba(220, 38, 38, 0.1) 100%
+      );
+      padding: 3rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+      position: relative;
+    }
+
+    .product-image.has-image {
+      background: linear-gradient(135deg, 
+        rgba(255, 107, 53, 0.3) 0%,
+        rgba(255, 165, 0, 0.25) 50%,
+        rgba(255, 215, 0, 0.2) 100%
+      );
+      padding: 2rem;
+    }
+
+    .product-emoji {
+      font-size: 5rem;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .product-img {
+      max-width: 100%;
+      max-height: 180px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    }
+
+    .product-info {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .product-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      text-shadow: 0 1px 4px rgba(255, 107, 53, 0.2);
+    }
+
+    .product-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      flex: 1;
+      line-height: 1.6;
+    }
+
+    .product-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gold-color), var(--orange-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .add-to-cart-button {
+      background: linear-gradient(135deg, var(--orange-color), var(--red-color));
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .add-to-cart-button:hover {
+      background: linear-gradient(135deg, var(--red-color), var(--orange-color));
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(255, 107, 53, 0.5);
+    }
+
+    .add-to-cart-button:active {
+      transform: scale(0.98);
+    }
+
+    /* Cart */
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(26, 15, 10, 0.85);
+      z-index: 998;
+      backdrop-filter: blur(4px);
+      display: none;
+    }
+
+    .cart-overlay.show {
+      display: block;
+    }
+
+    .cart-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 450px;
+      background: linear-gradient(135deg, var(--dark-surface) 0%, #2a1f1a 100%);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 24px rgba(255, 107, 53, 0.3);
+      border-left: 2px solid rgba(255, 107, 53, 0.3);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .cart-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .cart-header {
+      padding: 1.5rem;
+      border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 107, 53, 0.05);
+    }
+
+    .cart-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cart-close {
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 2rem;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .cart-close:hover {
+      background: rgba(255, 107, 53, 0.2);
+      color: var(--orange-color);
+    }
+
+    .cart-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .cart-empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .cart-items {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .cart-item {
+      background: linear-gradient(135deg, var(--dark-surface-light) 0%, #2a1f1a 100%);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      border: 1px solid rgba(255, 107, 53, 0.3);
+      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.1);
+    }
+
+    .cart-item-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .cart-item-emoji {
+      font-size: 2.5rem;
+    }
+
+    .cart-item-image {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+    }
+
+    .cart-item-details {
+      flex: 1;
+    }
+
+    .cart-item-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+      text-shadow: 0 1px 4px rgba(255, 107, 53, 0.2);
+    }
+
+    .cart-item-price {
+      font-size: 0.9rem;
+      color: rgba(255, 215, 0, 0.8);
+    }
+
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .quantity-button {
+      background: rgba(255, 107, 53, 0.2);
+      color: var(--text-primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      border: 1px solid rgba(255, 107, 53, 0.4);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .quantity-button:hover {
+      background: var(--orange-color);
+      border-color: var(--orange-color);
+      box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+    }
+
+    .quantity-value {
+      min-width: 40px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .remove-button {
+      background: transparent;
+      font-size: 1.25rem;
+      padding: 0.5rem;
+      margin-left: auto;
+      transition: transform 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .remove-button:hover {
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 4px rgba(220, 38, 38, 0.6));
+    }
+
+    .cart-footer {
+      border-top: 2px solid rgba(255, 107, 53, 0.3);
+      padding-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-label {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .total-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gold-color), var(--orange-color), var(--red-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .checkout-button {
+      background: linear-gradient(135deg, var(--orange-color), var(--red-color));
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .checkout-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+    }
+
+    .checkout-button:active {
+      transform: translateY(0);
+    }
+
+    /* Footer */
+    .footer {
+      background: linear-gradient(135deg, var(--dark-surface) 0%, #1a0f0a 100%);
+      border-top: 2px solid rgba(255, 107, 53, 0.3);
+      margin-top: 4rem;
+      box-shadow: 0 -4px 12px rgba(255, 107, 53, 0.1);
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .footer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .footer-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gold-color), var(--orange-color), var(--red-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-heading {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-text {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 107, 53, 0.2);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      background: rgba(255, 107, 53, 0.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-container {
+        padding: 1rem;
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .logo-text {
+        font-size: 1.25rem;
+      }
+
+      .logo-image {
+        height: 50px;
+      }
+
+      .header-container {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+      }
+
+      .header-left,
+      .header-right {
+        width: 100%;
+        justify-content: center;
+      }
+
+
+      .nav {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .container {
+        padding: 0 1rem;
+      }
+
+      .section-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .main-content {
+        padding: 2rem 0;
+      }
+
+      .hero {
+        min-height: 400px;
+      }
+
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+
+      .hero-button {
+        padding: 0.875rem 2rem;
+      }
+
+      .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .product-footer {
+        flex-direction: column;
+      }
+
+      .add-to-cart-button {
+        width: 100%;
+      }
+
+      .cart-sidebar {
+        max-width: 100%;
+      }
+
+      .footer-container {
+        padding: 2rem 1rem;
+        grid-template-columns: 1fr;
+      }
+
+      .footer-bottom {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-transition" id="pageTransition"></div>
+  <div class="splash" id="splash">
+    <div class="splash-content">
+      <div class="splash-glow"></div>
+      <div class="splash-logo"></div>
+      <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+    </div>
+  </div>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-left">
+        <div class="logo">
+          <img src="assets/elfbull-logo-full.png" alt="ElfBull Logo" class="logo-image">
+        </div>
+      </div>
+      <div class="header-right">
+        <nav class="nav">
+          <a href="#catalog" class="nav-link">Каталог</a>
+          <a href="#about" class="nav-link">О нас</a>
+          <a href="#contacts" class="nav-link">Контакты</a>
+        </nav>
+        <button class="cart-button" onclick="toggleCart()">
+          <span class="cart-icon">🛒</span>
+          <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-logo-bg"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">ElfBull - Лучшие вейп-товары</h1>
+      <p class="hero-subtitle">
+        Широкий ассортимент устройств, жидкостей и аксессуаров для вейпинга
+      </p>
+      <a href="#catalog" class="hero-button">Смотреть каталог</a>
+    </div>
+    <div class="hero-gradient"></div>
+    <div class="hero-flames"></div>
+  </section>
+
+  <main class="main-content">
+    <div class="container">
+      <h2 class="section-title">Каталог товаров</h2>
+      <div class="product-grid" id="productGrid">
+        <!-- Товары будут добавлены через JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Корзина -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2 class="cart-title">Корзина</h2>
+      <button class="cart-close" onclick="toggleCart()">×</button>
+    </div>
+    <div class="cart-content">
+      <div class="cart-items" id="cartItems">
+        <div class="cart-empty">
+          <span class="cart-empty-icon">🛒</span>
+          <p>Ваша корзина пуста</p>
+        </div>
+      </div>
+      <div class="cart-footer" id="cartFooter" style="display: none;">
+        <div class="cart-total">
+          <span class="total-label">Итого:</span>
+          <span class="total-price" id="totalPrice">0 €</span>
+        </div>
+        <button class="checkout-button" onclick="checkout()">Оформить заказ</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3 class="footer-title">ElfBull</h3>
+        <p class="footer-text">
+          Ваш надежный партнер в мире вейпинга. Качественные товары и отличный сервис.
+        </p>
+      </div>
+      <div class="footer-section">
+        <h4 class="footer-heading">Контакты</h4>
+        <p class="footer-text">Телефон: +7 (999) 123-45-67</p>
+        <p class="footer-text">Email: info@elfbull.ru</p>
+        <p class="footer-text">Адрес: г. Москва, ул. Примерная, д. 1</p>
+      </div>
+      <div class="footer-section">
+        <h4 class="footer-heading">Режим работы</h4>
+        <p class="footer-text">Пн-Пт: 10:00 - 20:00</p>
+        <p class="footer-text">Сб-Вс: 11:00 - 19:00</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 ElfBull. Все права защищены.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Прозрачная картинка с названием товара (SVG)
+    function productImageDataUri(name) {
+      const text = name.replace(/"/g, '');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160" viewBox="0 0 240 160">
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" 
+          font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="rgba(255,255,255,0.95)" 
+          style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${escapeXml(text)}</text>
+      </svg>`;
+      return 'data:image/svg+xml,' + encodeURIComponent(svg);
+    }
+    function escapeXml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Данные товаров
+    const products = [
+      {
+        id: 1,
+        name: 'Vaporesso XROS 3',
+        description: 'Компактный под-системный вейп с отличной автономностью и вкусопередачей',
+        price: 25,
+        emoji: '💨',
+        image: 'assets/vaporesso-xros3.png',
+        category: 'devices'
+      },
+      {
+        id: 2,
+        name: 'GeekVape Aegis Legend 2',
+        description: 'Мощный бокс-мод с защитой от воды и ударов, до 200W',
+        price: 55,
+        emoji: '⚡',
+        image: 'assets/geekvape-aegis-legend-2.png',
+        category: 'devices'
+      },
+      {
+        id: 3,
+        name: 'SMOK Nord 5',
+        description: 'Стильный под-системный вейп с регулируемой мощностью',
+        price: 30,
+        emoji: '🔥',
+        image: 'assets/smok-nord-5.png',
+        category: 'devices'
+      },
+      {
+        id: 4,
+        name: 'Жидкость "Тропический микс"',
+        description: 'Свежий вкус тропических фруктов, крепость 3mg, объем 30ml',
+        price: 6,
+        emoji: '🍹',
+        image: productImageDataUri('Тропический микс'),
+        category: 'liquids'
+      },
+      {
+        id: 5,
+        name: 'Жидкость "Табачный классик"',
+        description: 'Насыщенный табачный вкус, крепость 6mg, объем 30ml',
+        price: 6,
+        emoji: '🌿',
+        image: productImageDataUri('Табачный классик'),
+        category: 'liquids'
+      },
+      {
+        id: 6,
+        name: 'Жидкость "Мятная свежесть"',
+        description: 'Освежающий мятный вкус, крепость 0mg, объем 30ml',
+        price: 6,
+        emoji: '❄️',
+        image: productImageDataUri('Мятная свежесть'),
+        category: 'liquids'
+      },
+      {
+        id: 7,
+        name: 'Жидкость "Клубничный чизкейк"',
+        description: 'Сладкий десертный вкус, крепость 3mg, объем 30ml',
+        price: 6,
+        emoji: '🍓',
+        image: productImageDataUri('Клубничный чизкейк'),
+        category: 'liquids'
+      },
+      {
+        id: 8,
+        name: 'Зарядное устройство USB-C',
+        description: 'Быстрая зарядка для всех современных вейп-устройств',
+        price: 5,
+        emoji: '🔌',
+        image: productImageDataUri('Зарядное USB-C'),
+        category: 'accessories'
+      },
+      {
+        id: 9,
+        name: 'Набор сменных испарителей',
+        description: 'Комплект из 5 испарителей для различных устройств',
+        price: 13,
+        emoji: '🔧',
+        image: productImageDataUri('Набор испарителей'),
+        category: 'accessories'
+      },
+      {
+        id: 10,
+        name: 'Чехол для вейпа',
+        description: 'Защитный чехол из силикона, подходит для большинства устройств',
+        price: 4,
+        emoji: '🛡️',
+        image: productImageDataUri('Чехол для вейпа'),
+        category: 'accessories'
+      },
+      {
+        id: 11,
+        name: 'Аккумулятор 18650',
+        description: 'Высокоемкостный аккумулятор 3000mAh для бокс-модов',
+        price: 9,
+        emoji: '🔋',
+        image: productImageDataUri('Аккумулятор 18650'),
+        category: 'accessories'
+      },
+      {
+        id: 12,
+        name: 'Жидкость "Ванильное мороженое"',
+        description: 'Нежный сливочный вкус ванили, крепость 3mg, объем 30ml',
+        price: 6,
+        emoji: '🍦',
+        image: productImageDataUri('Ванильное мороженое'),
+        category: 'liquids'
+      }
+    ];
+
+    // Корзина
+    let cart = [];
+
+    // Плавный переход на другую страницу
+    function smoothNavigate(url) {
+      const overlay = document.getElementById('pageTransition');
+      if (overlay) {
+        overlay.classList.add('active');
+        setTimeout(() => { window.location.href = url; }, 400);
+      } else {
+        window.location.href = url;
+      }
+    }
+
+    // Splash screen - скрыть после загрузки
+    function hideSplash() {
+      const splash = document.getElementById('splash');
+      if (splash) {
+        splash.classList.add('hidden');
+        setTimeout(() => splash.remove(), 700);
+      }
+    }
+
+    // Telegram Web App init
+    function initTelegram() {
+      if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#2a1a15');
+        tg.setBackgroundColor('#1a0f0a');
+      }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      initTelegram();
+      renderProducts();
+      updateCartUI();
+      if (window.location.search.includes('add=1')) {
+        addToCart(1);
+        window.history.replaceState({}, '', 'index.html' + (window.location.hash || ''));
+      }
+      if (window.location.search.includes('add=2')) {
+        addToCart(2);
+        window.history.replaceState({}, '', 'index.html' + (window.location.hash || ''));
+      }
+      if (window.location.search.includes('add=3')) {
+        addToCart(3);
+        window.history.replaceState({}, '', 'index.html' + (window.location.hash || ''));
+      }
+      setTimeout(hideSplash, 1200);
+    });
+
+    if (document.readyState === 'complete') {
+      setTimeout(hideSplash, 800);
+    }
+
+    // Рендеринг товаров
+    function renderProducts() {
+      const productGrid = document.getElementById('productGrid');
+      productGrid.innerHTML = products.map(product => `
+        <div class="product-card" ${product.id <= 3 ? `onclick="smoothNavigate('${product.id === 1 ? 'vaporesso-xros3' : product.id === 2 ? 'geekvape-aegis-legend-2' : 'smok-nord-5'}.html')" style="cursor: pointer;"` : ''}>
+          <div class="product-image ${product.image ? 'has-image' : ''}">
+            ${product.image 
+              ? `<img src="${product.image}" alt="${product.name}" class="product-img">`
+              : `<span class="product-emoji">${product.emoji}</span>`
+            }
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">${product.name}</h3>
+            <p class="product-description">${product.description}</p>
+            <div class="product-footer" ${product.id <= 3 ? 'onclick="event.stopPropagation()"' : ''}>
+              <span class="product-price">${product.price.toLocaleString('de-DE')} €</span>
+              ${product.id === 1 
+                ? `<a href="vaporesso-xros3.html" class="add-to-cart-button" onclick="event.stopPropagation(); event.preventDefault(); smoothNavigate('vaporesso-xros3.html')">Подробнее</a>`
+                : product.id === 2 
+                  ? `<a href="geekvape-aegis-legend-2.html" class="add-to-cart-button" onclick="event.stopPropagation(); event.preventDefault(); smoothNavigate('geekvape-aegis-legend-2.html')">Подробнее</a>`
+                  : product.id === 3 
+                    ? `<a href="smok-nord-5.html" class="add-to-cart-button" onclick="event.stopPropagation(); event.preventDefault(); smoothNavigate('smok-nord-5.html')">Подробнее</a>`
+                    : `<button class="add-to-cart-button" onclick="addToCart(${product.id})">В корзину</button>`
+              }
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Добавление в корзину
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const existingItem = cart.find(item => item.id === productId);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({ ...product, quantity: 1 });
+      }
+
+      updateCartUI();
+      
+      // Анимация добавления
+      const cartButton = document.querySelector('.cart-button');
+      cartButton.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        cartButton.style.transform = 'scale(1)';
+      }, 200);
+    }
+
+    // Удаление из корзины
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      updateCartUI();
+    }
+
+    // Изменение количества
+    function updateQuantity(productId, quantity) {
+      if (quantity <= 0) {
+        removeFromCart(productId);
+        return;
+      }
+      const item = cart.find(item => item.id === productId);
+      if (item) {
+        item.quantity = quantity;
+        updateCartUI();
+      }
+    }
+
+    // Обновление UI корзины
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const cartFooter = document.getElementById('cartFooter');
+      const cartBadge = document.getElementById('cartBadge');
+      const totalPrice = document.getElementById('totalPrice');
+
+      const totalItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      // Обновление бейджа корзины
+      if (totalItemCount > 0) {
+        cartBadge.textContent = totalItemCount;
+        cartBadge.style.display = 'flex';
+      } else {
+        cartBadge.style.display = 'none';
+      }
+
+      // Рендеринг товаров в корзине
+      if (cart.length === 0) {
+        cartItems.innerHTML = `
+          <div class="cart-empty">
+            <span class="cart-empty-icon">🛒</span>
+            <p>Ваша корзина пуста</p>
+          </div>
+        `;
+        cartFooter.style.display = 'none';
+      } else {
+        cartItems.innerHTML = cart.map(item => `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              ${item.image 
+                ? `<img src="${item.image}" alt="${item.name}" class="cart-item-image">`
+                : `<span class="cart-item-emoji">${item.emoji}</span>`
+              }
+              <div class="cart-item-details">
+                <h4 class="cart-item-name">${item.name}</h4>
+                <p class="cart-item-price">${item.price.toLocaleString('de-DE')} €</p>
+              </div>
+            </div>
+            <div class="cart-item-controls">
+              <button class="quantity-button" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">−</button>
+              <span class="quantity-value">${item.quantity}</span>
+              <button class="quantity-button" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+              <button class="remove-button" onclick="removeFromCart(${item.id})">🗑️</button>
+            </div>
+          </div>
+        `).join('');
+        cartFooter.style.display = 'flex';
+        totalPrice.textContent = `${total.toLocaleString('de-DE')} €`;
+      }
+    }
+
+    // Открытие/закрытие корзины
+    function toggleCart() {
+      const cartSidebar = document.getElementById('cartSidebar');
+      const cartOverlay = document.getElementById('cartOverlay');
+      
+      const isOpen = cartSidebar.classList.contains('open');
+      
+      if (isOpen) {
+        cartSidebar.classList.remove('open');
+        cartOverlay.classList.remove('show');
+      } else {
+        cartSidebar.classList.add('open');
+        cartOverlay.classList.add('show');
+      }
+    }
+
+    // Оформление заказа
+    function checkout() {
+      if (cart.length === 0) return;
+      
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const msg = `Спасибо за заказ!\n\nТоваров: ${cart.reduce((sum, item) => sum + item.quantity, 0)}\nСумма: ${total.toLocaleString('de-DE')} €\n\nМы свяжемся с вами для подтверждения заказа.`;
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.showAlert(msg);
+      } else {
+        alert(msg);
+      }
+      
+      cart = [];
+      updateCartUI();
+      toggleCart();
+    }
+  </script>
+</body>
+</html>

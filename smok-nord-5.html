@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a0f0a">
+  <title>SMOK Nord 5 — ElfBull</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold-color: #FFD700;
+      --orange-color: #FF6B35;
+      --red-color: #DC2626;
+      --dark-bg: #1a0f0a;
+      --dark-surface: #2a1a15;
+      --dark-surface-light: #3a2a20;
+      --text-primary: #ffffff;
+      --text-secondary: #e8d4c4;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .page-bg-logo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background-image: url('assets/elfbull-logo-full.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      filter: blur(12px);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--dark-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.6s ease;
+    }
+
+    .splash.hidden { opacity: 0; pointer-events: none; }
+
+    .splash-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .splash-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      margin-top: -1rem;
+      background: radial-gradient(circle, rgba(255, 107, 53, 0.4) 0%, rgba(255, 215, 0, 0.2) 40%, transparent 70%);
+      border-radius: 50%;
+      animation: splashGlow 2s ease-in-out infinite;
+    }
+
+    .splash-logo {
+      width: 180px;
+      height: 180px;
+      background-image: url('assets/elfbull-logo-full.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      animation: splashLogoPulse 1.5s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+
+    .splash-loader {
+      width: 80px;
+      height: 4px;
+      background: rgba(255, 107, 53, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .splash-loader-bar {
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, var(--orange-color), var(--gold-color));
+      animation: splashLoader 1.2s ease-in-out infinite;
+    }
+
+    @keyframes splashLogoPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.9; }
+    }
+
+    @keyframes splashGlow {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    @keyframes splashLoader {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--dark-bg);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .page-transition.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 215, 0, 0.06) 0%, transparent 50%),
+        repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255, 107, 53, 0.02) 100px, rgba(255, 107, 53, 0.02) 101px),
+        repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(255, 107, 53, 0.02) 100px, rgba(255, 107, 53, 0.02) 101px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .header { position: relative; z-index: 10; }
+
+    .header {
+      background: var(--dark-surface);
+      border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+      padding: 1rem 2rem;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .logo-link img {
+      height: 50px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .back-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover { color: var(--orange-color); }
+
+    .product-page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .product-layout {
+      display: flex;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .product-image-block {
+      flex-shrink: 0;
+      width: 350px;
+      height: 350px;
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 165, 0, 0.15) 100%);
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      border: 2px solid rgba(255, 107, 53, 0.3);
+      box-shadow: 0 8px 24px rgba(255, 107, 53, 0.2);
+    }
+
+    .product-image-block img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+    }
+
+    .product-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .product-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--gold-color), var(--orange-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .product-price {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--orange-color);
+      margin-bottom: 1.5rem;
+    }
+
+    .product-desc {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn-add-cart {
+      background: linear-gradient(135deg, var(--orange-color), var(--red-color));
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-add-cart:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 107, 53, 0.5);
+    }
+
+    .btn-back {
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 1rem 2rem;
+      border: 2px solid rgba(255, 107, 53, 0.4);
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+
+    .btn-back:hover {
+      border-color: var(--orange-color);
+      color: var(--orange-color);
+    }
+
+    .product-sections {
+      border-top: 2px solid rgba(255, 107, 53, 0.2);
+      padding-top: 2rem;
+    }
+
+    .product-section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gold-color);
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+    }
+
+    .product-specs {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .product-specs li {
+      color: var(--text-secondary);
+      padding: 0.4rem 0;
+      line-height: 1.6;
+    }
+
+    .product-specs li span {
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+
+    .footer {
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(135deg, var(--dark-surface) 0%, #1a0f0a 100%);
+      border-top: 2px solid rgba(255, 107, 53, 0.3);
+      margin-top: 4rem;
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .product-layout { flex-direction: column; }
+      .product-image-block { width: 100%; height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-transition" id="pageTransition"></div>
+  <div class="splash" id="splash">
+    <div class="splash-content">
+      <div class="splash-glow"></div>
+      <div class="splash-logo"></div>
+      <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+    </div>
+  </div>
+  <div class="page-bg-logo"></div>
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo-link" onclick="event.preventDefault(); smoothNavigate('index.html')">
+        <img src="assets/elfbull-logo-full.png" alt="ElfBull">
+      </a>
+      <a href="index.html#catalog" class="back-link" onclick="event.preventDefault(); smoothNavigate('index.html#catalog')">← Назад в каталог</a>
+    </div>
+  </header>
+
+  <main class="product-page">
+    <div class="product-layout">
+      <div class="product-image-block">
+        <img src="assets/smok-nord-5.png" alt="SMOK Nord 5">
+      </div>
+      <div class="product-main">
+        <h1 class="product-title">SMOK Nord 5</h1>
+        <p class="product-price">30 €</p>
+        <p class="product-desc">Стильный под-системный вейп с регулируемой мощностью до 80 Вт. OLED-экран, плавная регулировка airflow, активация кнопкой или затяжкой. Идеален для DTL.</p>
+        <div class="product-actions">
+          <a href="index.html?add=3#catalog" class="btn-add-cart" onclick="event.preventDefault(); smoothNavigate('index.html?add=3#catalog')">Добавить в корзину</a>
+          <a href="index.html#catalog" class="btn-back" onclick="event.preventDefault(); smoothNavigate('index.html#catalog')">Вернуться в каталог</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-sections">
+      <h3 class="product-section-title">Характеристики</h3>
+      <ul class="product-specs">
+        <li><span>Мощность:</span> 5–80 Вт</li>
+        <li><span>Выход:</span> 0.5–4.0 В</li>
+        <li><span>Вход:</span> 3.3–4.2 В</li>
+        <li><span>Сопротивление:</span> 0.15–2.5 Ω</li>
+        <li><span>Батарея:</span> 2000 mAh (встроенная)</li>
+        <li><span>Экран:</span> OLED</li>
+        <li><span>Зарядка:</span> USB Type-C, до 1.2 А (1.5 А в Leather серии)</li>
+        <li><span>Время зарядки:</span> ~1 ч 40 мин</li>
+        <li><span>Размеры:</span> ~105 × 32.5 × 23.74 мм</li>
+        <li><span>Вес:</span> ~107 г</li>
+      </ul>
+
+      <h3 class="product-section-title">Испарители RPM-3 Meshed</h3>
+      <ul class="product-specs">
+        <li><span>0.15 Ω:</span> 40–80 Вт (предустановлен)</li>
+        <li><span>0.23 Ω:</span> 20–45 Вт (в комплекте)</li>
+      </ul>
+
+      <h3 class="product-section-title">Под и управление</h3>
+      <ul class="product-specs">
+        <li><span>Объём пода:</span> 2 мл (TPD) / 5 мл (в некоторых регионах)</li>
+        <li><span>Airflow:</span> плавная регулировка с двух сторон</li>
+        <li><span>Дизайн пода:</span> Coil-Lock (фиксация испарителя в поде)</li>
+        <li><span>Активация:</span> кнопка или затяжка</li>
+      </ul>
+
+      <h3 class="product-section-title">Защита</h3>
+      <ul class="product-specs">
+        <li>Низкое напряжение</li>
+        <li>Короткое замыкание</li>
+        <li>Ограничение затяжки 8 сек</li>
+        <li>Автоопределение пода</li>
+      </ul>
+
+      <h3 class="product-section-title">Рекомендации</h3>
+      <ul class="product-specs">
+        <li><span>Жидкость:</span> рекомендуется высокий VG (70%+) для лучшей производительности</li>
+      </ul>
+
+      <h3 class="product-section-title">Комплектация</h3>
+      <ul class="product-specs">
+        <li>Устройство SMOK Nord 5</li>
+        <li>Под с предустановленным испарителем 0.15 Ω</li>
+        <li>Запасной испаритель 0.23 Ω</li>
+        <li>Кабель USB Type-C</li>
+      </ul>
+    </div>
+  </main>
+
+  <script>
+    function smoothNavigate(url) {
+      const overlay = document.getElementById('pageTransition');
+      if (overlay) {
+        overlay.classList.add('active');
+        setTimeout(() => { window.location.href = url; }, 400);
+      } else {
+        window.location.href = url;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#2a1a15');
+        tg.setBackgroundColor('#1a0f0a');
+      }
+      setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if (splash) {
+          splash.classList.add('hidden');
+          setTimeout(() => splash.remove(), 700);
+        }
+      }, 1200);
+    });
+  </script>
+
+  <footer class="footer">
+    <a href="index.html" style="color: var(--orange-color); text-decoration: none;" onclick="event.preventDefault(); smoothNavigate('index.html')">← ElfBull</a> · &copy; 2026 ElfBull
+  </footer>
+</body>
+</html>
